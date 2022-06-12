@@ -5,9 +5,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { RenderPixelatedPass } from './RenderPixelatedPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GUI } from 'lil-gui';
 
 import checkerImg from './textures/checker.png';
-import { dirname } from 'path';
 
 window.addEventListener('DOMContentLoaded', () => {
     const pixelArt = new PixelArt();
@@ -31,7 +31,9 @@ class PixelArt {
         // this.initModel();
         this.initLight();
 
-        this.initHelper();
+        this.initGUI();
+
+        // this.initHelper();
         window.addEventListener('resize', this.onResizeWindow);
     }
 
@@ -62,8 +64,6 @@ class PixelArt {
         this.controls.target.set(0, 0, 0);
         this.camera.position.z = 2;
         this.camera.position.y = 2 * Math.tan(Math.PI / 6);
-
-        console.log(this.controls.enableRotate);
     };
 
     //Renderer
@@ -146,6 +146,7 @@ class PixelArt {
             new THREE.PlaneGeometry(planeSideLength, planeSideLength),
             new THREE.MeshPhongMaterial({
                 map: this.tex_checker,
+                side: THREE.DoubleSide,
             })
         );
         planeMesh.receiveShadow = true;
@@ -208,6 +209,26 @@ class PixelArt {
         target.position.set(0, 0, 0);
         spotLight.castShadow = true;
         this.scene.add(spotLight);
+    };
+
+    initGUI = () => {
+        const gui = new GUI();
+        const params = {
+            pixelSize: 6,
+            normalEdgeStrength: 0.3,
+            depthEdgeStrength: 0.4,
+        };
+
+        gui.add(params, 'pixelSize')
+            .min(1)
+            .max(16)
+            .step(1)
+            .onChange(() => {
+                this.renderPixelatedPass.setPixelSize(params.pixelSize);
+            });
+
+		gui.add ( this.renderPixelatedPass, 'normalEdgeStrength', ).min(0).max(2).step(.05);
+		gui.add ( this.renderPixelatedPass, 'depthEdgeStrength', ).min(0).max(1).step(.05);
     };
 
     onResizeWindow = () => {};
