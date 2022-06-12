@@ -21,6 +21,8 @@ class PixelArt {
         this.width = window.innerWidth;
         this.height = window.innerHeight;
 
+        this.onResizeWindow = this.onResizeWindow.bind(this);
+
         this.initRenderer();
         this.initScene();
         this.initCamera();
@@ -227,11 +229,21 @@ class PixelArt {
                 this.renderPixelatedPass.setPixelSize(params.pixelSize);
             });
 
-		gui.add ( this.renderPixelatedPass, 'normalEdgeStrength', ).min(0).max(2).step(.05);
-		gui.add ( this.renderPixelatedPass, 'depthEdgeStrength', ).min(0).max(1).step(.05);
+        gui.add(this.renderPixelatedPass, 'normalEdgeStrength').min(0).max(2).step(0.05);
+        gui.add(this.renderPixelatedPass, 'depthEdgeStrength').min(0).max(1).step(0.05);
     };
 
-    onResizeWindow = () => {};
+    private screenResolution: any;
+    onResizeWindow = () => {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        const aspectRatio = this.width / this.height;
+        this.camera.left = -aspectRatio;
+        this.camera.right = aspectRatio;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.width, this.height);
+        this.renderPixelatedPass.setSize(this.width, this.height);
+    };
 
     animate = () => {
         requestAnimationFrame(this.animate);
